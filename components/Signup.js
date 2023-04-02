@@ -7,16 +7,19 @@ import {
   View,
   Button,
   StyleSheet,
+  ToastAndroid
 } from "react-native";
-import * as SecureStore from "expo-secure-store";
 
 import Alert from "./Alert";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const SignupForm = () => {
-  const [email, setEmail] = React.useState(null);
-  const [accountName, setAccountName] = React.useState(null);
-  const [password, setPassword] = React.useState(null);
-  const [passwordVerify, setPasswordVerify] = React.useState(null);
+Userfront.init("demo1234");
+
+const SignupForm = ({ navigation }) => {
+  const [email, setEmail] = React.useState('');
+  const [accountName, setAccountName] = React.useState('');
+  const [password, setPassword] = React.useState('');
+  const [passwordVerify, setPasswordVerify] = React.useState('');
   const [alert, setAlert] = React.useState();
 
   const handleSuccess = async (res) => {
@@ -25,42 +28,59 @@ const SignupForm = () => {
     setPassword(null);
     setPasswordVerify(null);
     console.log(res);
-
-    // Set the access token
-    await SecureStore.setItemAsync(`access_demo1234`, res.tokens.access.value);
-
-    // To read the access token (in the future)
-    // await SecureStore.getItemAsync(`access_demo1234`);
-
-    // Redirect as desired, see https://reactnative.dev/docs/navigation#react-navigation
+    await AsyncStorage.setItem('DATA', res.tokens.access.value)
   };
 
   // Handle the form submission by calling Userfront.signup()
-  const handleSubmit = async () => {
-    // Reset the alert to empty
-    setAlert(null);
-    // Verify that the passwords match
-    if (password !== passwordVerify) {
-      return setAlert("Passwords must match");
-    }
+  // const handleSubmit = async () => {
+  //   // Reset the alert to empty
+  //   setAlert(null);
+  //   // Verify that the passwords match
+  //   if (password !== passwordVerify) {
+  //     return setAlert("Passwords must match");
+  //   }
 
-    try {
-      // Call Userfront.signup()
-      const res = await Userfront.signup({
-        method: "password",
-        email,
-        password,
-        data: {
-          accountName,
-        },
-        redirect: false,
-      });
-      handleSuccess(res);
-    } catch (error) {
-      console.log(error);
-      setAlert(error.message);
-    }
-  };
+  //   try {
+  //     // Call Userfront.signup()
+  //     const res = await Userfront.signup({
+  //       method: "password",
+  //       email,
+  //       password,
+  //       data: {
+  //         accountName,
+  //       },
+  //       redirect: false,
+  //     });
+  //     handleSuccess(res);
+  //   } catch (error) {
+  //     console.log(error);
+  //     setAlert(error.message);
+  //   }
+  // };
+
+  const onSubmit = async (email, password, accountName) => {
+    const payload = {
+      email: email,
+      password: password,
+      username: "quadrobay",
+      name: accountName,
+      data: {
+        custom: "data"
+      },
+      tenantId: "6nz9wwmb",
+      options: {}
+    };
+
+    const response = await fetch("https://api.userfront.com/v0/auth/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    });
+
+    console.log(response.json());
+  }
 
   return (
     <View style={styles.container}>
@@ -97,7 +117,7 @@ const SignupForm = () => {
         />
         <Button
           style={styles.button}
-          onPress={handleSubmit}
+          onPress={() => onSubmit(email, password, accountName)}
           title="Sign up"
           accessibilityLabel="Sign up"
         />
@@ -123,8 +143,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
   },
   button: {
-    marginBottom: 12,
-    padding: 8,
+    // marginBottom: 12,
+    // padding: 8,
+    marginTop: 50
   },
 });
 

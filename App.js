@@ -1,15 +1,14 @@
 import * as React from "react";
 import Userfront from "@userfront/core";
 import { View, StyleSheet } from "react-native";
-
-Userfront.init("demo1234", { domain: "example.com" });
-
 import SignupForm from "./components/Signup";
+import SignupTest from "./screens/SignupTest";
+import Home from "./screens/Home";
 
 export default function App() {
   return (
     <View style={styles.container}>
-      <SignupForm />
+      <SignupTest />
     </View>
   );
 }
